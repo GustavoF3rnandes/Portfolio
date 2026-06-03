@@ -1,1 +1,41 @@
+# Ambiente virtual Python
+venv/
+.venv/
+env/
+
+# Cache Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+
+# Variáveis de ambiente
 .env
+.env.local
+.env.production
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Dependências
+node_modules/
+
+# Build / Deploy
+dist/
+build/
+*.egg-info/
+
+# Logs
+*.log
+
+# Vercel
+.vercel/

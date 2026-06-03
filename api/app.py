@@ -2,57 +2,54 @@ from flask import Flask, render_template, redirect, request, flash
 from flask_mail import Mail, Message
 from dotenv import load_dotenv
 import os
+
 load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = 'moraiscode'
+app.secret_key = os.getenv("SECRET_KEY", "moraiscode")
 
 mail_settings = {
-    "MAIL_SERVER": 'smtp.gmail.com',
+    "MAIL_SERVER": "smtp.gmail.com",
     "MAIL_PORT": 465,
     "MAIL_USE_TLS": False,
     "MAIL_USE_SSL": True,
     "MAIL_USERNAME": os.getenv("EMAIL"),
-    "MAIL_PASSWORD": os.getenv("SENHA")
+    "MAIL_PASSWORD": os.getenv("SENHA"),
 }
 
 app.config.update(mail_settings)
 mail = Mail(app)
 
-class Contato:
-    def __init__(self, nome, email, mensagem):
-        self.nome = nome
-        self.email = email
-        self.mensagem = mensagem
 
-@app.route('/')
+@app.route("/")
 def index():
-    return render_template('index.html')
+    return render_template("index.html")
 
-@app.route('/send', methods=['GET', 'POST'])
+
+@app.route("/send", methods=["POST"])
 def send():
-    if request.method == 'POST':
-        formContato = Contato(
-            request.form["nome"],
-            request.form["email"],
-            request.form["mensagem"]
-        )
+    nome = request.form.get("nome", "").strip()
+    email = request.form.get("email", "").strip()
+    mensagem = request.form.get("mensagem", "").strip()
 
+    if not nome or not email or not mensagem:
+        flash("Por favor, preencha todos os campos.")
+        return redirect("/")
+
+    try:
         msg = Message(
-            subject = f'{formContato.nome} te enviou uma mensagem no portfólio',
-            sender = app.config.get("MAIL_USERNAME"),
-            recipients= ['gustavof3rnandes@outlook.com', app.config.get("MAIL_USERNAME")],
-            body = f'''
-            
-            {formContato.nome} com o e-mail {formContato.email}, te enviou a seguinte mensagem:
-
-            {formContato.mensagem}
-
-            '''
+            subject=f"{nome} te enviou uma mensagem no portfólio",
+            sender=app.config.get("MAIL_USERNAME"),
+            recipients=["gustavof3rnandes@outlook.com", app.config.get("MAIL_USERNAME")],
+            body=f"{nome} ({email}) enviou:\n\n{mensagem}",
         )
         mail.send(msg)
-        flash('Mensagem enviada com sucesso!')
-    return redirect('/')
+        flash("Mensagem enviada com sucesso!")
+    except Exception:
+        flash("Erro ao enviar mensagem. Tente novamente mais tarde.")
 
-if __name__ == '__main__':
-    app.run()
+    return redirect("/")
+
+
+if __name__ == "__main__":
+    app.run(debug=True)

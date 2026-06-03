@@ -1,62 +1,84 @@
-/* Abre e fecha menu lateral em modo mobile */
-
+/* ===== Mobile Menu Toggle ===== */
 const menuMobile = document.querySelector(".menu-mobile");
-const body = document.querySelector("body");
+const menuIcon = menuMobile.querySelector("i");
+const body = document.body;
 
 menuMobile.addEventListener("click", () => {
-  menuMobile.classList.contains("bi-list")
-    ? menuMobile.classList.replace("bi-list", "bi-x")
-    : menuMobile.classList.replace("bi-x", "bi-list");
-  body.classList.toggle("menu-nav-active");
+    const isOpen = body.classList.toggle("menu-nav-active");
+    menuIcon.className = isOpen ? "bi bi-x" : "bi bi-list";
 });
 
-/* Fecha o menu quando clicar em algum item e muda o icone para list */
-
-const navItem = document.querySelectorAll(".nav-item");
-
-navItem.forEach((item) => {
-  item.addEventListener("click", () => {
-    if (body.classList.contains("menu-nav-active")) {
-      body.classList.remove("menu-nav-active");
-      menuMobile.classList.replace("bi-x", "bi-list");
-    }
-  });
+/* Close menu when clicking a nav item */
+document.querySelectorAll(".nav-item").forEach((item) => {
+    item.addEventListener("click", () => {
+        if (body.classList.contains("menu-nav-active")) {
+            body.classList.remove("menu-nav-active");
+            menuIcon.className = "bi bi-list";
+        }
+    });
 });
 
-// Animar todos os itens na tela que tiverem meu atributo data-anime
+/* ===== Scroll Animations ===== */
+const animatedElements = document.querySelectorAll("[data-anime]");
 
-const item = document.querySelectorAll("[data-anime]");
-
-const animeScroll = () => {
-  const windowTop = window.pageYOffset + window.innerHeight * 0.85 ;
-
-  item.forEach((element) => {
-    if (windowTop > element.offsetTop) {
-      element.classList.add("animate");
-    } else {
-      element.classList.remove("animate");
-    }
-  });
+const observerOptions = {
+    root: null,
+    rootMargin: "0px 0px -15% 0px",
+    threshold: 0.1
 };
 
-animeScroll();
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+            entry.target.classList.add("animate");
+        }
+    });
+}, observerOptions);
 
-window.addEventListener("scroll", ()=>{
-  animeScroll();
-})
+animatedElements.forEach((el) => observer.observe(el));
 
-// Ativar carregamento no botão de enviar formulário para
+/* ===== Active Nav Link on Scroll ===== */
+const sections = document.querySelectorAll("section[id]");
+const navLinks = document.querySelectorAll(".nav-menu a");
 
-const btnEnviar = document.querySelector('#btn-enviar')
-const btnEnviarLoader = document.querySelector('#btn-enviar-loader')
+const highlightNav = () => {
+    const scrollY = window.pageYOffset;
 
-btnEnviar.addEventListener("click", ()=>{
-  btnEnviarLoader.style.display = "block";
-  btnEnviar.style.display = "none"
-})
+    sections.forEach((section) => {
+        const sectionTop = section.offsetTop - 100;
+        const sectionHeight = section.offsetHeight;
+        const sectionId = section.getAttribute("id");
 
-// Tira a mensagem de sucesso depois de 5 segundos
+        if (scrollY >= sectionTop && scrollY < sectionTop + sectionHeight) {
+            navLinks.forEach((link) => {
+                link.classList.remove("active");
+                if (link.getAttribute("href") === `#${sectionId}`) {
+                    link.classList.add("active");
+                }
+            });
+        }
+    });
+};
 
-setTimeout(() => {
-  document.querySelector('#alerta').style.display = 'none';
-}, 5000)
+window.addEventListener("scroll", highlightNav);
+
+/* ===== Form Submit Loader ===== */
+const btnEnviar = document.querySelector("#btn-enviar");
+const btnEnviarLoader = document.querySelector("#btn-enviar-loader");
+
+if (btnEnviar) {
+    btnEnviar.addEventListener("click", () => {
+        btnEnviarLoader.style.display = "inline-flex";
+        btnEnviar.style.display = "none";
+    });
+}
+
+/* ===== Flash Message Auto-dismiss ===== */
+const alerta = document.querySelector("#alerta");
+if (alerta) {
+    setTimeout(() => {
+        alerta.style.opacity = "0";
+        alerta.style.transform = "translateY(-10px)";
+        setTimeout(() => alerta.remove(), 300);
+    }, 5000);
+}
