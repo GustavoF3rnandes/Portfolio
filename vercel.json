@@ -3,14 +3,20 @@
         {
             "src": "api/app.py",
             "use": "@vercel/python"
+        },
+        {
+            "src": "api/static/**",
+            "use": "@vercel/static"
         }
     ],
-    "rewrites": [
-        { "source": "/(.*)", "destination": "/api/app" }
-    ],
-    "functions": {
-        "api/app.py": {
-            "runtime": "@vercel/python"
+    "routes": [
+        {
+            "src": "/static/(.*)",
+            "dest": "/api/static/$1"
+        },
+        {
+            "src": "/(.*)",
+            "dest": "/api/app"
         }
-    }
+    ]
 }
