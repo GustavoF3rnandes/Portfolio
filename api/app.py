@@ -5,7 +5,7 @@ import os
 
 load_dotenv()
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path="")
 app.secret_key = os.getenv("SECRET_KEY", "moraiscode")
 
 mail_settings = {
